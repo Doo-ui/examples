@@ -4,45 +4,45 @@
 <meta charset="utf-8">
 <title>Doo-ui.org</title>
 <style type="text/css">
-	SPAN, A {margin-right:4px;}
-	.selected {text-decoration:none;}
+	SPAN, A {margin-right: 4px;}
+	.selected {text-decoration: none;}
 	.completed_false {text-decoration: none;}
 	.completed_true {text-decoration: line-through;}
-	#allTodos {position:absolute; top:5px; right:5px;}
+	#allTodos {position: absolute;top: 5px;right: 5px;}
 </style>
-<script type="text/javascript" src="http://jamjax.com/doo-ui/doo-ui.beta.2.min.js"></script>
+<script type="text/javascript"
+	src="http://jamjax.com/doo-ui/doo-ui.beta.2.min.js"></script>
 </head>
 <body>
 	<div>
-		<span>Show:</span>
-		<span id="todoFilters">
+		<span>Show:</span> <span id="todoFilters"> 
 			<a href="#"
 				onclick="Doo('todoFilters').action(event, '{action}')"
 				class="{selected}">{text}</a>
 		</span>
-		
+
 		<div id="todoEntry">
-			<input value="{value}"/>
+			<input value="{value}" />
 			<button onclick="Doo('todoEntry').action(event, 'ADD', this.previousSibling)">{btn}</button>
 		</div>
 
 		<ul id="todoList">
 			<li class="completed_{completed}" onclick="Doo('todoList').action(event, 'TOGGLE_STATUS', {id})">{todo}</li>
 		</ul>
-	
-		<ol id="allTodos"  >
+
+		<ol id="allTodos">
 			<li class="completed_{completed}">{todo}</li>
 		</ol>
-	</div>	
-		
+	</div>
+
 	<script type="text/javascript">
 	
    		function init() {
-    			
+			
    			var todoEntryData = {"btn":"Add Todo", "value":""};
    			var todoListData = [];
    			var todoFilterTypes = [
-   	     		{text:"All",   	action:"SHOW_ALL", selected:"selected"}, 
+   	 		{text:"All",   	action:"SHOW_ALL", selected:"selected"}, 
    				{text:"Active",	action:"SHOW_ACTIVE", selected:""},
    				{text:"Completed",	action:"SHOW_COMPLETED", selected:""}
    			  ]; 
@@ -52,71 +52,73 @@
 	   		Doo.DataStore.create('todoEntry',todoEntryData);
 			
 			Doo('todoFilters').connect('todoFilters');
-	      	Doo('todoList').connect('todoList');
-	     	Doo('allTodos').connect('todoList');
-	    	    Doo('todoEntry').connect('todoEntry');
-	 		
-	      	Doo('allTodos').setNonefound("");
-
-	      	Doo.renderUI();
+		  	Doo('todoList').connect('todoList');
+		 	Doo('allTodos').connect('todoList');
+			Doo('todoEntry').connect('todoEntry');
+		 		
+		  	Doo('allTodos').setNonefound("");
+	
+		  	Doo.renderUI();
 			
-		    Doo('todoEntry').action = (e, action, todoElem) => {
-		    		let todo = todoElem.value.trim();
-		    		if (todo.length > 0) {
-	
+		  	// ADD todo
+			Doo('todoEntry').action = (e, action, todoElem) => {
+				let todo = todoElem.value.trim();
+				if (todo.length > 0) {
 			 		switch(action) {
-		        	    		case 'ADD':
-							let id = Doo('todoList')._id++;
-		        	    			Doo.DataStore.append('todoList',    
-				    					[{id, 
-				    					todo,
-				    					completed:0}]);
+						case 'ADD':
+						let id = Doo('todoList')._id++;
+						Doo.DataStore.append('todoList',
+									[{id, 
+									todo,
+									completed:0}]);
 	
-		        	    					todoElem.value = "";
-				    			break;
-		 	    		}
-			    		Doo.renderUI();
+								todoElem.value = "";
+							break;
+		 			}
+					Doo.renderUI();
 				}
 			}
-			
+			// SHOW todo
 			Doo('todoFilters').action = (e, action) => {
-		    		e.preventDefault();
-		    		
-  			      Doo('todoFilters').getData().map(item => {
-  			        item.selected = '';
-  			    	  	if (item.action === action) {
+				e.preventDefault();
+				
+				Doo('todoFilters').getData().map(item => {
+					item.selected = '';
+  				  	if (item.action === action) {
 						item.selected = "selected";
-  			        }  
-  			      })
-		     	switch(action) {
-		        	    	case 'SHOW_ACTIVE':
-		        	    		filter = (item) => {if (!item.completed) return item};
-		  				break;
-		    	    		case 'SHOW_ALL':
-		    	    			filter = (item) =>item;
-		     			break;
-		        	    	case 'SHOW_COMPLETED':
-		        	    		filter =(item) => {if (item.completed) return item}; 
-		        	    		break;
-		     	}
-		     	Doo("todoList").setFilter(filter)
-	     		Doo.renderUI();
-	    	    }
+  					}  
+				});
 			
-			Doo('todoList').action = (e, action, id) => {
-		     	switch(action) {
-		    			case 'TOGGLE_STATUS':
-		    			      Doo('todoList').getData().map(item => {
-		    			        if (item.id === id) {
-								item.completed = !item.completed;
-		    			        }  
-		    			      })
+				switch(action) {
+					case 'SHOW_ACTIVE':
+						filter = (item) => {if (!item.completed) return item};
 						break;
-		     	}
+					case 'SHOW_ALL':
+						filter = (item) =>item;
+						break;
+					case 'SHOW_COMPLETED':
+						filter =(item) => {if (item.completed) return item}; 
+						break;
+				}
+				Doo("todoList").setFilter(filter)
+				Doo.renderUI();
+			}
+			
+			// TOGGLE Complete
+			Doo('todoList').action = (e, action, id) => {
+		 	switch(action) {
+				case 'TOGGLE_STATUS':
+					Doo('todoList').getData().map(item => {
+						if (item.id === id) {
+							item.completed = !item.completed;
+						}  
+					})
+					break;
+		 		}
  				Doo.renderUI();
 			}
    		}   
-    Doo.ready(init);
+		Doo.ready(init);
 	</script>
 
 </body>
