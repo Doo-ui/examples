@@ -1,125 +1,123 @@
-<!doctype html>
+/**
+ * Copyright (c) 2005-2018 Henrik Javen, H-Consulting. All rights reserved 
+ * Doo-ui.org
+ * todo.html 
+ */
+ <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <title>Doo-ui.org</title>
 <style type="text/css">
-	SPAN, A {margin-right: 4px;}
-	.selected {text-decoration: none;}
+	SPAN, A {margin-right:4px;}
+	.selected {text-decoration:none;}
 	.completed_false {text-decoration: none;}
 	.completed_true {text-decoration: line-through;}
-	#allTodos {position: absolute;top: 5px;right: 5px;}
+	#allTodos {position:absolute; top:5px; right:5px;}
 </style>
-<script type="text/javascript"
-	src="http://jamjax.com/doo-ui/doo-ui.beta.2.min.js"></script>
+<script	src="http://jamjax.com/doo-ui/doo-ui.beta.3.min.js"></script>
+
 </head>
 <body>
 	<div>
-		<span>Show:</span> <span id="todoFilters"> 
+		<div>Show:</div>
+		<span id="todoVisibilityFilters">
 			<a href="#"
-				onclick="Doo('todoFilters').action(event, '{action}')"
+				onclick="Doo(this.parentElement.id).action(event, '{action}')"
 				class="{selected}">{text}</a>
 		</span>
-
 		<div id="todoEntry">
-			<input value="{value}" />
-			<button onclick="Doo('todoEntry').action(event, 'ADD', this.previousSibling)">{btn}</button>
+			<input value="{value}"/>
+			<button onclick="Doo(this.parentElement.id).action(this.previousSibling)">{btn}</button>
 		</div>
 
 		<ul id="todoList">
-			<li class="completed_{completed}" onclick="Doo('todoList').action(event, 'TOGGLE_STATUS', {id})">{todo}</li>
+			<li class="completed_{completed}" onclick="Doo(this.parentElement.id).action({id})">{todo}</li>
 		</ul>
-
-		<ol id="allTodos">
+	
+		<ol id="allTodos"  >
 			<li class="completed_{completed}">{todo}</li>
 		</ol>
-	</div>
-
+	</div>	
+		
 	<script type="text/javascript">
 	
    		function init() {
-			
+    			
+   			// Data sets
    			var todoEntryData = {"btn":"Add Todo", "value":""};
    			var todoListData = [];
    			var todoFilterTypes = [
-   	 		{text:"All",   	action:"SHOW_ALL", selected:"selected"}, 
+   	     		{text:"All",   	action:"SHOW_ALL", selected:"selected"}, 
    				{text:"Active",	action:"SHOW_ACTIVE", selected:""},
    				{text:"Completed",	action:"SHOW_COMPLETED", selected:""}
    			  ]; 
    			
-	   		Doo.DataStore.create('todoList',todoListData);
-	   		Doo.DataStore.create('todoFilters',todoFilterTypes);
+	   		// Initiate Data store
+   			Doo.DataStore.create('todoList',todoListData);
+	   		Doo.DataStore.create('todoVisibilityFilters',todoFilterTypes);
 	   		Doo.DataStore.create('todoEntry',todoEntryData);
 			
-			Doo('todoFilters').connect('todoFilters');
-		  	Doo('todoList').connect('todoList');
-		 	Doo('allTodos').connect('todoList');
-			Doo('todoEntry').connect('todoEntry');
-		 		
-		  	Doo('allTodos').setNonefound("");
-	
-		  	Doo.renderUI();
+	   		// Connect data to templates instances 
+			Doo('todoVisibilityFilters').connect('todoVisibilityFilters');
+	      	Doo('todoList').connect('todoList');
+	     	Doo('allTodos').connect('todoList');
+	    	    Doo('todoEntry').connect('todoEntry');
+	 		
+	      	Doo('allTodos').setNonefound("");
+
+	      	Doo.renderUI();
 			
-		  	// ADD todo
-			Doo('todoEntry').action = (e, action, todoElem) => {
-				let todo = todoElem.value.trim();
-				if (todo.length > 0) {
-			 		switch(action) {
-						case 'ADD':
-						let id = Doo('todoList')._id++;
-						Doo.DataStore.append('todoList',
-									[{id, 
-									todo,
-									completed:0}]);
+	      	// Enter todo - action
+		    Doo('todoEntry').action = (todoInputElem) => {
+		    		let todo = todoInputElem.value.trim();
+		    		if (todo.length > 0) {
+					let id = Doo('todoList')._id++;
+		        	    	Doo.DataStore.append('todoList',    
+				    					[{id, 
+				    					todo,
+				    					completed:false}]);
 	
-								todoElem.value = "";
-							break;
-		 			}
-					Doo.renderUI();
+		        	    	todoInputElem.value = "";
 				}
 			}
-			// SHOW todo
-			Doo('todoFilters').action = (e, action) => {
-				e.preventDefault();
-				
-				Doo('todoFilters').getData().map(item => {
-					item.selected = '';
-  				  	if (item.action === action) {
+			
+	      	// Visibility filter - actions
+			Doo('todoVisibilityFilters').action = (e, action) => {
+		    		e.preventDefault();
+  			    let criteria = (item) => {
+  			        item.selected = '';
+  			    	  	if (item.action === action) {
 						item.selected = "selected";
-  					}  
-				});
+  			    	  	}
+  			    	 }
+  			     Doo.DataStore.update('todoVisibilityFilters', criteria);
+
+  			     let filter = (item) =>item;
+  			     switch(action) {
+ 	    				case 'SHOW_ALL':
+	     				break;
+		        	    	case 'SHOW_ACTIVE':
+		        	    		filter = (item) => {if (!item.completed) return item};
+		  				break;
+		        	    	case 'SHOW_COMPLETED':
+		        	    		filter =(item) => {if (item.completed) return item}; 
+		        	    		break;
+		     	}
+	     		Doo.DataStore.setFilter('todoList', filter);
+	    	    }
 			
-				switch(action) {
-					case 'SHOW_ACTIVE':
-						filter = (item) => {if (!item.completed) return item};
-						break;
-					case 'SHOW_ALL':
-						filter = (item) =>item;
-						break;
-					case 'SHOW_COMPLETED':
-						filter =(item) => {if (item.completed) return item}; 
-						break;
-				}
-				Doo("todoList").setFilter(filter)
-				Doo.renderUI();
-			}
-			
-			// TOGGLE Complete
-			Doo('todoList').action = (e, action, id) => {
-		 	switch(action) {
-				case 'TOGGLE_STATUS':
-					Doo('todoList').getData().map(item => {
-						if (item.id === id) {
-							item.completed = !item.completed;
-						}  
-					})
-					break;
-		 		}
- 				Doo.renderUI();
+	      	// todo list toggle action
+			Doo('todoList').action = (id) => {
+		    		let criteria = (item) => {
+					    			        if (item.id === id) {
+											item.completed = !item.completed;
+						    			    }  
+					    			     }
+    			    Doo.DataStore.update('todoList', criteria);  		
 			}
    		}   
-		Doo.ready(init);
+    		Doo.ready(init);
 	</script>
-
 </body>
 </html>
