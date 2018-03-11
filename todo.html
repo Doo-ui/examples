@@ -1,9 +1,10 @@
-/**
+<!doctype html>
+<!-- /**
  * Copyright (c) 2005-2018 Henrik Javen, H-Consulting. All rights reserved 
  * Doo-ui.org
  * todo.html 
  */
- <!doctype html>
+--> 
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -16,30 +17,29 @@
 	#allTodos {position:absolute; top:5px; right:5px;}
 </style>
 <script	src="http://jamjax.com/doo-ui/doo-ui.beta.3.min.js"></script>
-
 </head>
+
 <body>
 	<div>
 		<div>Show:</div>
-		<span id="todoVisibilityFilters">
-			<a href="#"
-				onclick="Doo(this.parentElement.id).action(event, '{action}')"
-				class="{selected}">{text}</a>
+		<span id="todoVisibilityFilters"> <a href="#"
+			onclick="Doo(this.parentElement.id).action(event, '{action}')"
+			class="{selected}">{text}</a>
 		</span>
 		<div id="todoEntry">
-			<input value="{value}"/>
+			<input value="{value}" />
 			<button onclick="Doo(this.parentElement.id).action(this.previousSibling)">{btn}</button>
 		</div>
 
 		<ul id="todoList">
 			<li class="completed_{completed}" onclick="Doo(this.parentElement.id).action({id})">{todo}</li>
 		</ul>
-	
-		<ol id="allTodos"  >
+
+		<ol id="allTodos">
 			<li class="completed_{completed}">{todo}</li>
 		</ol>
-	</div>	
-		
+	</div>
+
 	<script type="text/javascript">
 	
    		function init() {
