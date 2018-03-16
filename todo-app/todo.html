@@ -26,18 +26,18 @@
 
 		<!-- Doodad:todoVisibilityFilters -->
 		<span id="todoVisibilityFilters">
-			<a href="#" onclick="Doo('todoVisibilityFilters').action(event, '{action}')" class="{selected}">{text}</a>
+			<a href="#" onclick="Doo('todoVisibilityFilters').impl.onclick(event, '{action}')" class="{selected}">{text}</a>
 		</span>
 
 		<!-- Doodad:todoEntry -->
 		<div id="todoEntry">
 			<input value="{value}" />
-			<button onclick="Doo('todoEntry').action(this.previousSibling)">{btn}</button>
+			<button onclick="Doo('todoEntry').impl.onclick(this.previousSibling)">{btn}</button>
 		</div>
 
 		<!-- Doodad:todoList -->
 		<ul id="todoList">
-			<li class="completed_{completed}" onclick="Doo('todoList').action({id})">{todo}</li>
+			<li class="completed_{completed}" onclick="Doo('todoList').impl.onclick({id})">{todo}</li>
 		</ul>
 
 		<!-- Doodad:allTodos -->
@@ -47,83 +47,93 @@
 	</div>
 
 	<script type="text/javascript">
-	
-   		function init() {
-    			
-   			// Data sets
-   			var todoEntryData = {"btn":"Add Todo", "value":""};
-   			var todoListData = [];
-   			var todoFilterTypes = [
-   	     		{text:"All",   	action:"SHOW_ALL", selected:"selected"}, 
-   				{text:"Active",	action:"SHOW_ACTIVE", selected:""},
-   				{text:"Completed",	action:"SHOW_COMPLETED", selected:""}
-   			  ]; 
-   			
-	   		// Initiate Data store
-   			Doo.DataStore.create('todoList',todoListData);
-	   		Doo.DataStore.create('todoVisibilityFilters',todoFilterTypes);
-	   		Doo.DataStore.create('todoEntry',todoEntryData);
-			
-	   		// Connect data to templates instances 
-			Doo('todoVisibilityFilters').connect('todoVisibilityFilters');
-	      	Doo('todoList').connect('todoList');
-	     	Doo('allTodos').connect('todoList');
-	    	    Doo('todoEntry').connect('todoEntry');
-	 		
-	      	Doo('allTodos').setNonefound("");
 
-	      	Doo.renderUI();
+	var TodoApp = {
+		'init': 
+ 		function() {
+			// Data sets
+			var todoEntryData = {"btn":"Add Todo", "value":""};
+			var todoListData = [];
+			var todoFilterTypes = [
+	 			{text:"All", action:"SHOW_ALL", selected:"selected"}, 
+				{text:"Active",	action:"SHOW_ACTIVE", selected:""},
+				{text:"Completed",	action:"SHOW_COMPLETED", selected:""}
+			]; 
 			
-	      	// Enter todo - action
-		    Doo('todoEntry').action = (todoInputElem) => {
-		    		let todo = todoInputElem.value.trim();
-		    		if (todo.length > 0) {
-					let id = Doo('todoList')._id++;
-		        	    	Doo.DataStore.append('todoList',    
-				    					[{id, 
-				    					todo,
-				    					completed:false}]);
+ 			// Initiate Data store
+			Doo.DataStore.create('todoList',todoListData);
+	 		Doo.DataStore.create('todoVisibilityFilters',todoFilterTypes);
+ 			Doo.DataStore.create('todoEntry',todoEntryData);
+
+	 		// Connect data to templates instances 
+			Doo('todoVisibilityFilters').connect('todoVisibilityFilters').setImpl(TodoVisibilityFilters);
+			Doo('todoList').connect('todoList').setImpl(TodoList);
+			Doo('todoEntry').connect('todoEntry').setImpl(TodoEntry);
+			Doo('allTodos').connect('todoList')
+			Doo('allTodos').setNonefound("");
+			
+			Doo.renderUI();
+		} 
+	};
 	
-		        	    	todoInputElem.value = "";
+	var TodoEntry = {
+		'onclick':
+		function(todoInputElem)	{
+			let todo = todoInputElem.value.trim();
+			if (todo.length > 0) {
+				let id = Doo('todoList')._id++;
+				Doo.DataStore.append('todoList',
+								[{id, 
+								todo,
+								completed:false}]);
+
+				todoInputElem.value = "";
+			}
+		}
+	};
+	
+	var 	TodoVisibilityFilters = {
+		'onclick':
+		function(e, action) {
+			e.preventDefault();
+			// set the selected filter
+			let criteria = (item) => {
+									item.selected = '';
+									if (item.action === action) {
+										item.selected = "selected";
+									}
+			}
+			Doo.DataStore.update('todoVisibilityFilters', criteria);
+
+			// set the filteron the associated list	
+			let filter = (item) =>item;
+			switch(action) {
+				case 'SHOW_ALL':
+					break;
+				case 'SHOW_ACTIVE':
+					filter = (item) => {if (!item.completed) return item};
+					break;
+				case 'SHOW_COMPLETED':
+					filter =(item) => {if (item.completed) return item}; 
+					break;
+			}
+		 	Doo.DataStore.setFilter('todoList', filter);
+		}	
+	};	
+
+	var TodoList = {
+		'onclick':
+		function(id) {
+			let criteria = (item) => {
+				if (item.id === id) {
+					item.completed = !item.completed;
 				}
 			}
-			
-	      	// Visibility filter - actions
-			Doo('todoVisibilityFilters').action = (e, action) => {
-		    		e.preventDefault();
-  			    let criteria = (item) => {
-  			        item.selected = '';
-  			    	  	if (item.action === action) {
-						item.selected = "selected";
-  			    	  	}
-  			    	 }
-  			     Doo.DataStore.update('todoVisibilityFilters', criteria);
-
-  			     let filter = (item) =>item;
-  			     switch(action) {
- 	    				case 'SHOW_ALL':
-	     				break;
-		        	    	case 'SHOW_ACTIVE':
-		        	    		filter = (item) => {if (!item.completed) return item};
-		  				break;
-		        	    	case 'SHOW_COMPLETED':
-		        	    		filter =(item) => {if (item.completed) return item}; 
-		        	    		break;
-		     	}
-	     		Doo.DataStore.setFilter('todoList', filter);
-	    	    }
-			
-	      	// todo list toggle action
-			Doo('todoList').action = (id) => {
-		    		let criteria = (item) => {
-					    			        if (item.id === id) {
-											item.completed = !item.completed;
-						    			    }  
-					    			     }
-    			    Doo.DataStore.update('todoList', criteria);  		
-			}
-   		}   
-    		Doo.ready(init);
+			Doo.DataStore.update('todoList', criteria);		
+		}
+	};
+	
+	Doo.ready(TodoApp.init);
 	</script>
 </body>
 </html>
