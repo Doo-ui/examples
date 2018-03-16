@@ -98,10 +98,10 @@
 			e.preventDefault();
 			// set the selected filter
 			let criteria = (item) => {
-									item.selected = '';
-									if (item.action === action) {
-										item.selected = "selected";
-									}
+						item.selected = '';
+						if (item.action === action) {
+							item.selected = "selected";
+						}
 			}
 			Doo.DataStore.update('todoVisibilityFilters', criteria);
 
