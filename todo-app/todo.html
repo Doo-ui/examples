@@ -1,11 +1,12 @@
 <!doctype html>
-<!-- /**
+<html lang="en">
+<!-- 
+ /**
  * Copyright (c) 2005-2018 Henrik Javen, H-Consulting. All rights reserved 
  * Doo-ui.org
  * todo.html 
  */
 --> 
-<html lang="en">
 <head>
 <meta charset="utf-8">
 <title>Doo-ui.org</title>
@@ -16,25 +17,30 @@
 	.completed_true {text-decoration: line-through;}
 	#allTodos {position:absolute; top:5px; right:5px;}
 </style>
-<script	src="http://jamjax.com/doo-ui/doo-ui.beta.3.min.js"></script>
+<script	src="../js/doo-ui.beta.5.min.js"></script>
 </head>
 
 <body>
 	<div>
 		<div>Show:</div>
-		<span id="todoVisibilityFilters"> <a href="#"
-			onclick="Doo(this.parentElement.id).action(event, '{action}')"
-			class="{selected}">{text}</a>
+
+		<!-- Doodad:todoVisibilityFilters -->
+		<span id="todoVisibilityFilters">
+			<a href="#" onclick="Doo('todoVisibilityFilters').action(event, '{action}')" class="{selected}">{text}</a>
 		</span>
+
+		<!-- Doodad:todoEntry -->
 		<div id="todoEntry">
 			<input value="{value}" />
-			<button onclick="Doo(this.parentElement.id).action(this.previousSibling)">{btn}</button>
+			<button onclick="Doo('todoEntry').action(this.previousSibling)">{btn}</button>
 		</div>
 
+		<!-- Doodad:todoList -->
 		<ul id="todoList">
-			<li class="completed_{completed}" onclick="Doo(this.parentElement.id).action({id})">{todo}</li>
+			<li class="completed_{completed}" onclick="Doo('todoList').action({id})">{todo}</li>
 		</ul>
 
+		<!-- Doodad:allTodos -->
 		<ol id="allTodos">
 			<li class="completed_{completed}">{todo}</li>
 		</ol>
