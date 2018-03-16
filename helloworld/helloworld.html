@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Doo-ui.org | Hello World</title>
+<script	src="../js/doo-ui.beta.5.min.js"></script>
+</head>
+
+<body>
+
+	<h3 id="hello1">{text}</h3>
+	<hr/>
+	<ol id="hello2">
+		<li>{text} {doo:n}</li>
+	</ol>
+
+	<script type="text/javascript">
+
+		Doo.ready(
+			function() {
+				var helloData1 = {"text":"Hello World"};
+				var helloData2 = Array(10).fill(helloData1, 0);	
+				Doo.DataStore.create('helloData1',helloData1);
+				Doo.DataStore.create('helloData2',helloData2);
+					
+				Doo('hello1').connect('helloData1');
+				Doo('hello2').connect('helloData2');		
+					
+				Doo.renderUI();
+			}		
+		);
+		
+		
+		//Doo.ready(HelloApp);
+	</script>
+	
+	
+
+</body>
+</html>	
